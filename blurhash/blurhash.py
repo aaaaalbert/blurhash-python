@@ -9,7 +9,6 @@ import math
 
 # Alphabet for base 83
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~"
-alphabet_values = dict(zip(alphabet, range(len(alphabet))))
 
 def base83_decode(base83_str):
     """
@@ -17,7 +16,7 @@ def base83_decode(base83_str):
     """
     value = 0
     for base83_char in base83_str:
-        value = value * 83 + alphabet_values[base83_char]
+        value = value * 83 + alphabet.index(base83_char)
     return value
 
 def base83_encode(value, length):
