@@ -88,13 +88,8 @@ def blurhash_decode(blurhash, width, height, punch = 1.0, linear = False):
     to a relatively small size and then scale the result up, as it
     basically looks the same anyways.
     """
-    if len(blurhash) < 6:
-        raise ValueError("BlurHash must be at least 6 characters long.")
-    
     # Decode metadata
-    size_info = base83_decode(blurhash[0])
-    size_y = int(size_info / 9) + 1
-    size_x = (size_info % 9) + 1
+    size_x, size_y = blurhash_components(blurhash)
     
     quant_max_value = base83_decode(blurhash[1])
     real_max_value = (float(quant_max_value + 1) / 166.0) * punch
