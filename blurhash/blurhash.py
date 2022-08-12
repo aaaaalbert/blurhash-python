@@ -105,10 +105,13 @@ def blurhash_decode(blurhash, width, height, punch = 1.0, linear = False):
         srgb_to_linear((dc_value >> 8) & 255),
         srgb_to_linear(dc_value & 255)
     )]
+
+    # Drop header, continue with components
+    blurhash = blurhash[6:]
     
     # Decode AC components
-    for component in range(1, size_x * size_y):
-        ac_value = base83_decode(blurhash[4+component*2:4+(component+1)*2])
+    for component in range(0, size_x * size_y - 1):
+        ac_value = base83_decode(blurhash[component*2:(component+1)*2])
         colours.append((
             sign_pow((float(int(ac_value / (19 * 19))) - 9.0) / 9.0, 2.0) * real_max_value,
             sign_pow((float(int(ac_value / 19) % 19) - 9.0) / 9.0, 2.0) * real_max_value,
