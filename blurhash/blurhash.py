@@ -195,7 +195,6 @@ def blurhash_encode(image, components_x=4, components_y=4, linear=False):
         
     # Calculate components
     components = []
-    max_ac_component = 0.0
     for j in range(components_y):
         for i in range(components_x):
             norm_factor = 1.0 if (i == 0 and j == 0) else 2.0
@@ -213,8 +212,8 @@ def blurhash_encode(image, components_x=4, components_y=4, linear=False):
             component[2] /= (width * height)
             components.append(component)
             
-            if not (i == 0 and j == 0):
-                max_ac_component = max(max_ac_component, abs(component[0]), abs(component[1]), abs(component[2]))
+    max_ac_component = max(max(abs(component[0][1:]), abs(component[1][1:]),
+            abs(component[2][1:])))
                 
     # Encode components
     dc_value = (linear_to_srgb(components[0][0]) << 16) + \
