@@ -21,7 +21,7 @@ def base83_decode(base83_str):
 
 def base83_encode(value, length):
     """
-    Decodes an integer to a base83 string, as used in blurhash.
+    Encodes an integer to a base83 string, as used in blurhash.
     
     Length is how long the resulting string should be. Will complain
     if the specified length is too short.
