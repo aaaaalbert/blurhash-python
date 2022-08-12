@@ -10,6 +10,8 @@ import math
 # Alphabet for base 83
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~"
 
+
+
 def base83_decode(base83_str):
     """
     Decodes a base83 string, as used in blurhash, to an integer.
@@ -18,6 +20,8 @@ def base83_decode(base83_str):
     for base83_char in base83_str:
         value = value * 83 + alphabet.index(base83_char)
     return value
+
+
 
 def base83_encode(value, length):
     """
@@ -35,6 +39,8 @@ def base83_encode(value, length):
         result += alphabet[int(digit)]
     return result
 
+
+
 def srgb_to_linear(value):
     """
     srgb 0-255 integer to linear 0.0-1.0 floating point conversion.
@@ -44,11 +50,15 @@ def srgb_to_linear(value):
         return value / 12.92
     return math.pow((value + 0.055) / 1.055, 2.4)
 
+
+
 def sign_pow(value, exp):
     """
     Sign-preserving exponentiation.
     """
     return math.copysign(math.pow(abs(value), exp), value)
+
+
 
 def linear_to_srgb(value):
     """
@@ -58,6 +68,8 @@ def linear_to_srgb(value):
     if value <= 0.0031308:
         return int(value * 12.92 * 255 + 0.5)
     return int((1.055 * math.pow(value, 1 / 2.4) - 0.055) * 255 + 0.5)
+
+
 
 def blurhash_components(blurhash):
     """
@@ -73,7 +85,9 @@ def blurhash_components(blurhash):
     
     return size_x, size_y
 
-def blurhash_decode(blurhash, width, height, punch = 1.0, linear = False):
+
+
+def blurhash_decode(blurhash, width, height, punch=1.0, linear=False):
     """
     Decodes the given blurhash to an image of the specified size.
     
@@ -145,7 +159,9 @@ def blurhash_decode(blurhash, width, height, punch = 1.0, linear = False):
         pixels.append(pixel_row)
     return pixels
     
-def blurhash_encode(image, components_x = 4, components_y = 4, linear = False):
+
+
+def blurhash_encode(image, components_x=4, components_y=4, linear=False):
     """
     Calculates the blurhash for an image using the given x and y component counts.
     
