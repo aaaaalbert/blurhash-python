@@ -29,6 +29,26 @@ packer = {
 
 # Actual base-specific quantizer and packer implementations
 
+"""base64url format description:
+* 4 channels (RGBA)
+* 6-bit based encoding with URL-safe base64
+* 4 base64 digits contain 24 bits, i.e. 3 bytes
+
+Sequence of 6-bit fields:
+--------- first byte
+0   Escape  \x00    used because 0 is no meaningful size in default Blurhash
+1   Type    \x17    arbitrary ID for this specific format
+2   Size    3 bits for (x-1) and (y-1), each.
+3   AC max
+--------- second byte
+4   DC components as RGBA-5658
+5   (continued)
+6   (continued)
+7   (continued)
+--------- third and further bytes
+DCT components, 6 bits per channel
+
+"""
 def base64url_quantizer(dc, ac_max, normalized_ac_components):
     """Map the various float values to suitable values usable in this base."""
     # return quant_dc, quant_ac_max, quant_components
