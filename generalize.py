@@ -89,13 +89,18 @@ def linearize(image):
     pass
 
 
+def get_dimensions(image):
+    height = len(image)
+    width = len(image[0])
+    number_of_channels = len(image[0][0])
+    return height, width, number_of_channels
+
+
 def dct(image, components_x, components_y):
     """Perform the Discrete Cosine Transform on the image.
     Return the 2D list of components (x and y dimensions),
     each containing as many entries as the image has channels."""
-    height = len(image)
-    width = len(image[0])
-    number_of_channels = len(image[0][0])
+    height, width, number_of_channels = get_dimensions(image)
 
     # Calculate components
     components = []
@@ -125,9 +130,7 @@ def normalize(components):
     """Normalize the AC components of the DCT.
     Return the DC component, maximum AC component, and the normalized
     AC components."""
-    height = len(components)
-    width = len(components[0])
-    number_of_channels = len(components[0][0])
+    height, width, number_of_channels = get_dimensions(components)
 
     dc = components[0][0]
     max_ac_component = 0
