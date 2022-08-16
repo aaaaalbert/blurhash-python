@@ -128,8 +128,8 @@ def dct(image, components_x, components_y):
 
 def normalize(components):
     """Normalize the AC components of the DCT.
-    Return the DC component, maximum AC component, and the normalized
-    AC components."""
+    Return the maximum AC component and the normalized AC components.
+    (The DC component is left unchanged.)"""
     height, width, number_of_channels = get_dimensions(components)
 
     dc = components[0][0]
@@ -148,7 +148,7 @@ def normalize(components):
                 components[y][x][c] /= max_ac_component
 
     components[0][0] = dc
-    return dc, max_ac_component, components
+    return max_ac_component, components
 
 
 
@@ -161,7 +161,8 @@ def blurhash_encode(image, components_x, components_y, is_linear=True, base=83):
 
     components = dct(image, components_x, components_y)
 
-    dc, ac_max, normalized_ac_components = normalize(components)
+    dc = components[0][0]
+    ac_max, normalized_ac_components = normalize(components)
 
     quantizer = get_quantizer(base)
     quant_dc, quant_ac_max, quant_components = quantizer(dc, ac_max, normalized_ac_components)
