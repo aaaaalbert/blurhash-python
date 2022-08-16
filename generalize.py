@@ -7,24 +7,9 @@ Goal:
     * Make it easier to swap bases, use different packing, ...
 
 TODO:
-    * Most of this is only docstring sketches so far
+    * All of this is completely untested
     * Decoding is missing
 """
-
-# Helper dicts to store quantizer and packer functions for a named base
-#
-# Add yours here (plus a short note to describe them)
-
-quantizer = {
-        # Base64-URL, https://datatracker.ietf.org/doc/html/rfc4648#section-5
-        # (like Python's base64.b64encode with altchars="-_" and no padding)
-        "base64-url": base64url_quantizer,
-        }
-
-packer = {
-        # XXX Uses a slightly alternative 4-channel format for now
-        "base64-url": base64url_packer,
-        }
 
 
 # Actual base-specific quantizer and packer implementations
@@ -70,12 +55,45 @@ def base64url_quantizer(dc, ac_max, normalized_ac_components):
     return quant_dc, quant_ac_max, normalized_ac_components
 
 
-def base64url_packer(components_x, components_y, dc, quant_ac_max, quant_ac_components):
+def _base64url_word2bytes(word):
+    """Convert 24-bit words to three-byte chunks."""
+    # Mask out the three contained 8-bit sequences
+    first = (word & 0xff00) >> 16
+    second = (word & 0x00ff00) >> 8
+    third = (word & 0x0000ff)
+    return bytes(chr(first) + chr(second) + chr(third), "ASCII")
+
+
+def base64url_packer(quant_dc, quant_ac_max, quant_ac_components):
     """Pack the quantized components into a string, using the digits
-    of this base.
-    TODO: Document the string format this packer is going to use."""
-    # return packed_values
-    pass
+    of this base."""
+    height, width, number_of_channels = get_dimensions(quant_ac_components)
+
+    # Pack header
+    first_word = ((((0b000000<<6 + 0b10111)<<6 + height-1)<<3 +
+            width-1)<<3 + quant_ac_max)
+
+    r, g, b, a = quant_dc
+    second_word = ((r<<6 + g)<<5 + b)<<8 + a
+
+    header_bytes = (_base64url_word2bytes(first_word) +
+            _base64url_word2bytes(second_word))
+
+    packed_values = base64.b64encode(header_bytes, altchars=b"-_")
+
+    # Pack DCT AC components
+    pixel_bytes = b""
+    for y in range(height):
+        for x in range(width):
+            pixel_word = 0
+            for c in range(number_of_channels):
+                pixel_word = pixel_word << 6 + quant_ac_components[y][x][c]
+            current_pixel_bytes = _base64url_word2bytes(pixel_word)
+            pixel_bytes += base64.b64encode(current_pixel_bytes)
+
+    packed_values += pixel_bytes
+
+    return packed_values
 
 
 
@@ -200,4 +218,21 @@ def blurhash_encode(image, components_x, components_y, is_linear=True, base=83):
             quant_ac_components)
     
     return packed_values
+
+
+
+# Helper dicts to store quantizer and packer functions for a named base
+#
+# Add yours here (plus a short note to describe them)
+
+quantizer = {
+        # Base64-URL, https://datatracker.ietf.org/doc/html/rfc4648#section-5
+        # (like Python's base64.b64encode with altchars="-_" and no padding)
+        "base64-url": base64url_quantizer,
+        }
+
+packer = {
+        # XXX Uses a slightly alternative 4-channel format for now
+        "base64-url": base64url_packer,
+        }
 
