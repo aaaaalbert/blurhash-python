@@ -11,36 +11,31 @@ TODO:
     * Decoding is missing
 """
 
-# Helper functions to select an appropriate quantizer and packer for a base
+# Helper dicts to store quantizer and packer functions for a named base
+#
+# Add yours here (plus a short note to describe them)
 
-def get_quantizer(base):
-    """Get the appropriate quantizer for this base. (Depending on the base,
-    you will want different numbers of "steps" in your values.)"""
-    if base==64:
-        return base64quantizer
-    else:
-        raise NotImplementedError("Sorry, no quantizer for base %d yet" % base)
+quantizer = {
+        # Base64-URL, https://datatracker.ietf.org/doc/html/rfc4648#section-5
+        # (like Python's base64.b64encode with altchars="-_" and no padding)
+        "base64-url": base64url_quantizer,
+        }
 
-
-def get_packer(base):
-    """Get the appropriate packer for this base. (This is where the actual
-    data string format is constructed.)"""
-    if base==64:
-        return base64packer
-    else:
-        raise NotImplementedError("Sorry, no packer for base %d yet" % base)
-
+packer = {
+        # XXX Uses a slightly alternative 4-channel format for now
+        "base64-url": base64url_packer,
+        }
 
 
 # Actual base-specific quantizer and packer implementations
 
-def base64quantizer(dc, ac_max, normalized_ac_components):
+def base64url_quantizer(dc, ac_max, normalized_ac_components):
     """Map the various float values to suitable values usable in this base."""
     # return quant_dc, quant_ac_max, quant_components
     pass
 
 
-def base64packer(components_x, components_y, dc, quant_ac_max, quant_ac_components):
+def base64url_packer(components_x, components_y, dc, quant_ac_max, quant_ac_components):
     """Pack the quantized components into a string, using the digits
     of this base.
     TODO: Document the string format this packer is going to use."""
@@ -164,11 +159,9 @@ def blurhash_encode(image, components_x, components_y, is_linear=True, base=83):
     dc = components[0][0]
     ac_max, normalized_ac_components = normalize(components)
 
-    quantizer = get_quantizer(base)
-    quant_dc, quant_ac_max, quant_components = quantizer(dc, ac_max, normalized_ac_components)
+    quant_dc, quant_ac_max, quant_components = quantizer[base](dc, ac_max, normalized_ac_components)
 
-    packer = get_packer(base)
-    packed_values = packer(components_x, components_y, dc, quant_ac_max,
+    packed_values = packer[base](components_x, components_y, dc, quant_ac_max,
             quant_ac_components)
     
     return packed_values
