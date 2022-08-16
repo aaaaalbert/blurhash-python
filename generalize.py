@@ -51,8 +51,23 @@ DCT components, 6 bits per channel
 """
 def base64url_quantizer(dc, ac_max, normalized_ac_components):
     """Map the various float values to suitable values usable in this base."""
-    # return quant_dc, quant_ac_max, quant_components
-    pass
+    height, width, number_of_channels = get_dimensions(normalized_ac_components)
+
+    r, g, b, a = dc
+    r = int(r * 31)
+    g = int(g * 63)
+    b = int(b * 31)
+    a = int(a * 255)
+    quant_dc = [r, g, b, a]
+
+    quant_ac_max = ac_max * 63
+
+    for y in range(height):
+        for x in range(width):
+            for c in range(number_of_channels):
+                normalized_ac_components[y][x][c] *= 63
+
+    return quant_dc, quant_ac_max, normalized_ac_components
 
 
 def base64url_packer(components_x, components_y, dc, quant_ac_max, quant_ac_components):
