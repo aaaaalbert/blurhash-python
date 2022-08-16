@@ -93,14 +93,59 @@ def dct(image, components_x, components_y):
     """Perform the Discrete Cosine Transform on the image.
     Return the 2D list of components (x and y dimensions),
     each containing as many entries as the image has channels."""
-    pass
+    height = len(image)
+    width = len(image[0])
+    number_of_channels = len(image[0][0])
+
+    # Calculate components
+    components = []
+    for j in range(components_y):
+        for i in range(components_x):
+            if i==j==0:
+                norm_factor = 1.0
+            else:
+                norm_factor = 2.0
+            component = []
+            for y in range(int(height)):
+                for x in range(int(width)):
+                    basis = norm_factor * math.cos(math.pi * i * x / width) * \
+                                          math.cos(math.pi * j * y / height)
+                    for c in range(number_of_channels):
+                        component[c] += basis * image[y][x][c]
+
+            for c in range(number_of_channels):
+                component[c] /= (width * height)
+            components.append(component)
+
+    return components
+
 
 
 def normalize(components):
     """Normalize the AC components of the DCT.
     Return the DC component, maximum AC component, and the normalized
     AC components."""
-    pass
+    height = len(components)
+    width = len(components[0])
+    number_of_channels = len(components[0][0])
+
+    dc = components[0][0]
+    max_ac_component = 0
+    for channel in range(number_of_channels):
+        # XXX No `abs` for lists?
+        potential_max = max(components[1:][channel])
+        potential_min = min(components[1:][channel])
+        max_ac_component = max(max_ac_component, potential_max, -potential_min)
+
+    # Normalize every AC component. (DC is at index 0, we'll restore it later.)
+    for y in range(0, height):
+        component = []
+        for x in range(0, width):
+            for c in range(number_of_channels):
+                components[y][x][c] /= max_ac_component
+
+    components[0][0] = dc
+    return dc, max_ac_component, components
 
 
 
