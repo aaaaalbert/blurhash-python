@@ -51,6 +51,38 @@ def base64packer(components_x, components_y, dc, quant_ac_max, quant_ac_componen
 
 # Helper functions needed for building the Blurhash components
 
+def srgb_to_linear(value):
+    """
+    Convert sRGB value (integer, 0-255) to linear (float, 0.0-1.0).
+    (value must be in correct range, we don't check.)
+    See https://en.wikipedia.org/wiki/SRGB#Transformation for details
+    """
+    value = value / 255
+    if value <= 0.04045:
+        return value / 12.92
+    else:
+        return math.pow((value + 0.055) / 1.055, 2.4)
+
+
+def linear_to_srgb(value):
+    """
+    Convert linear value (float, 0.0-1.0) to sRGB (integer, 0-255)
+    (value must be in correct range, we don't check.)
+    See https://en.wikipedia.org/wiki/SRGB#Transformation for details
+    """
+    if value <= 0.0031308:
+        return int(value * 12.92 * 255 + 0.5)
+    else:
+        return int((1.055 * math.pow(value, 1 / 2.4) - 0.055) * 255 + 0.5)
+
+
+def sign_pow(value, exp):
+    """
+    Sign-preserving exponentiation.
+    """
+    return math.copysign(math.pow(abs(value), exp), value)
+
+
 def linearize(image):
     """Convert image from sRGB to linear.
     Return linearized image."""
